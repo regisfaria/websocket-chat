@@ -3,6 +3,7 @@ import { container } from 'tsyringe';
 import { websocket } from '../http';
 
 import { CreateUserService } from '../services/CreateUserService';
+import { GetAllUsersService } from '../services/GetAllUsersService';
 
 websocket.on('connect', socket => {
   socket.on('start', async data => {
@@ -17,6 +18,14 @@ websocket.on('connect', socket => {
       name,
     });
 
-    console.log(user);
+    socket.broadcast.emit('new_users', user);
   });
+
+  socket.on('get_users', async (callback) => {
+    const getAllUsersService = container.resolve(GetAllUsersService);
+
+    const users = await getAllUsersService.execute();
+
+    callback(users);
+  })
 });
